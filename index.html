@@ -12,6 +12,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.js"></script>
 
 <style>
+  :root {
+    --ink: #172033;
+    --muted: #64748b;
+    --line: rgba(148, 163, 184, .22);
+    --paper: rgba(255, 255, 255, .86);
+    --primary: #ec4899;
+    --secondary: #f0a6ca;
+    --soft-shadow: 0 18px 50px rgba(190, 24, 93, .08);
+  }
+
   @font-face {
     font-family: "Noto Sans Devanagari";
     src: url("https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io@main/fonts/NotoSansDevanagari/hinted/ttf/NotoSansDevanagari-Regular.ttf") format("truetype");
@@ -26,24 +36,89 @@
     font-weight: 700 900;
     font-display: swap;
   }
-  body { font-family: "Noto Sans Devanagari", "Noto Sans", Arial, sans-serif; }
-  .flow-line { font-family: "Noto Sans Devanagari", "Mangal", sans-serif; }
-  .sidebar-scroll::-webkit-scrollbar { width: 6px; }
-  .sidebar-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
-  .sidebar-scroll::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 3px; }
-  .sidebar-scroll::-webkit-scrollbar-thumb:hover { background: #a5b4fc; }
+  * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
+  body {
+    color: var(--ink);
+    font-family: "Noto Sans Devanagari", "Noto Sans", Arial, sans-serif;
+    background:
+      radial-gradient(circle at 8% 0%, rgba(251, 207, 232, .7), transparent 30rem),
+      radial-gradient(circle at 95% 12%, rgba(245, 208, 254, .6), transparent 28rem),
+      #fff8fb !important;
+  }
+  header {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(120deg, #f9a8d4 0%, #fbcfe8 48%, #f5d0fe 100%) !important;
+    box-shadow: 0 18px 45px rgba(236, 72, 153, .18) !important;
+  }
+  header::after {
+    content: "";
+    position: absolute;
+    width: 20rem; height: 20rem;
+    right: -7rem; top: -10rem;
+    border: 1px solid rgba(255,255,255,.45);
+    border-radius: 50%;
+    box-shadow: 0 0 0 2rem rgba(255,255,255,.2), 0 0 0 5rem rgba(255,255,255,.12);
+    pointer-events: none;
+  }
+  header > div { position: relative; z-index: 1; }
+  header h1 { color: #831843; letter-spacing: -.035em; text-shadow: 0 2px 16px rgba(255,255,255,.35); }
+  header p { color: #9d174d !important; }
+  header .inline-flex {
+    color: #9d174d;
+    border: 1px solid rgba(255,255,255,.55);
+    background: rgba(255,255,255,.35) !important;
+    box-shadow: 0 8px 24px rgba(190, 24, 93, .1);
+  }
+  .flow-line { font-family: "Noto Sans Devanagari", "Mangal", sans-serif; }
+  .sidebar-scroll::-webkit-scrollbar { width: 5px; }
+  .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+  .sidebar-scroll::-webkit-scrollbar-thumb { background: #f9a8d4; border-radius: 99px; }
   .tab-panel { display: none; }
-  .tab-panel.active { display: block; animation: fadeIn 0.25s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-  #toast { transition: opacity 0.3s, transform 0.3s; transform: translateY(20px); opacity: 0; pointer-events: none; }
+  .tab-panel.active { display: block; animation: fadeIn .4s cubic-bezier(.2,.8,.2,1); }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Shared surfaces */
+  .bg-white {
+    background: var(--paper) !important;
+    border-color: var(--line) !important;
+    box-shadow: var(--soft-shadow);
+    backdrop-filter: blur(16px);
+  }
+  .q-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1.15rem !important;
+    transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+  }
+  .q-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: linear-gradient(#ec4899, #f0a6ca);
+    opacity: .75;
+  }
+  .q-card:hover { box-shadow: 0 22px 55px rgba(79, 70, 229, .13); transform: translateY(-3px); border-color: rgba(129, 140, 248, .45) !important; }
+  #panelShort > div:first-child, #panelLong > div:first-child { border-radius: 1.25rem; }
+  #panelShort > div:first-child h2, #panelLong > div:first-child h2 { letter-spacing: -.02em; }
+  .nav-item { border-left: 3px solid transparent; transition: all .2s ease; }
+  .nav-item:hover { color: #be185d !important; background: #fff1f7 !important; transform: translateX(2px); }
+  .nav-item.active { background: #fce7f3 !important; color: #be185d !important; border-left-color: #ec4899; }
+  input, select { background: rgba(255,250,253,.85) !important; border-color: var(--line) !important; }
+  input:focus, select:focus { box-shadow: 0 0 0 4px rgba(236,72,153,.14) !important; border-color: #f9a8d4 !important; }
+  button { -webkit-tap-highlight-color: transparent; }
+  .tab-btn { min-height: 3rem; }
+  .tab-btn.bg-indigo-600, .tab-btn.bg-violet-600 { background: linear-gradient(135deg, #ec4899, #f0a6ca) !important; box-shadow: 0 10px 22px rgba(236,72,153,.2) !important; }
+  #btnDownloadShort, #btnDownloadLong { border: 0; background: linear-gradient(135deg, #ec4899, #f0a6ca) !important; box-shadow: 0 12px 24px rgba(236,72,153,.2) !important; }
+  #btnDownloadShort:hover, #btnDownloadLong:hover { filter: brightness(1.08); transform: translateY(-2px); }
+  #toast { transition: opacity .3s, transform .3s; transform: translateY(20px); opacity: 0; pointer-events: none; box-shadow: 0 18px 45px rgba(15,23,42,.2); }
   #toast.show { transform: translateY(0); opacity: 1; }
-  .q-card { transition: box-shadow 0.2s, transform 0.2s; }
-  .q-card:hover { box-shadow: 0 8px 25px rgba(79, 70, 229, 0.12); transform: translateY(-1px); }
-  .nav-item.active { background: #eef2ff; color: #4338ca; border-left: 3px solid #4f46e5; }
-  table { width: 100%; border-collapse: collapse; border: 1px solid #334155; }
-  th, td { border: 1px solid #94a3b8; padding: 8px; vertical-align: middle; }
-  th { font-weight: 700; text-align: center; background: #f1f5f9; }
+  table { width: 100%; border-collapse: collapse; border: 1px solid #cbd5e1; overflow: hidden; }
+  th, td { border: 1px solid #e2e8f0; padding: 9px; vertical-align: middle; }
+  th { font-weight: 700; text-align: center; background: #fff1f7; color: #9d174d; }
+  tr:nth-child(even) td { background: rgba(248,250,252,.6); }
   tr { break-inside: avoid; page-break-inside: avoid; }
   thead { display: table-header-group; }
   tfoot { display: table-footer-group; }
@@ -57,10 +132,253 @@
     th, td { border: 1px solid #000 !important; }
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   }
-  .answer-copy strong, .long-copy strong { color: #312e81; font-weight: 800; }
+  .answer-copy strong, .long-copy strong { color: #9d174d; font-weight: 800; }
   .long-copy h4 { margin-top: 1.35rem; margin-bottom: .65rem; padding-bottom: .3rem; border-bottom: 1px solid #e2e8f0; }
   .long-copy p { line-height: 1.95; margin-bottom: .85rem; }
   .long-copy li { line-height: 1.8; margin-bottom: .35rem; }
+  @media (max-width: 640px) {
+    header > div { padding-top: 1.45rem !important; padding-bottom: 1.45rem !important; }
+    header h1 { font-size: 1.45rem !important; line-height: 1.35; }
+    header .flex.items-center { gap: .45rem; }
+    header .inline-flex { padding: .38rem .6rem; font-size: .68rem; }
+    .max-w-7xl { padding-left: 1rem !important; padding-right: 1rem !important; }
+    .mt-6 { margin-top: 1rem !important; }
+    .pb-16 { padding-bottom: 3rem !important; }
+    .bg-white { border-radius: 1rem !important; }
+    #panelShort > div:first-child, #panelLong > div:first-child { padding: 1.1rem !important; }
+    #shortContent, #longContent { gap: 1rem !important; }
+    .q-card { padding: 1rem !important; margin-bottom: 1rem !important; }
+    .q-card h3 { font-size: .9rem; line-height: 1.65; }
+    .answer-copy p, .answer-copy li, .long-copy p, .long-copy li { font-size: .88rem !important; }
+    .long-copy h4 { font-size: 1rem; }
+    .overflow-x-auto { border-radius: .75rem; }
+    th, td { min-width: 120px; padding: 8px; font-size: .78rem; }
+    #toast { left: 1rem; right: 1rem; bottom: 1rem; max-width: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  }
+
+  /* Pink palette for utility-generated content */
+  header .text-indigo-200 { color: #9d174d !important; }
+  header .text-indigo-100 { color: #9d174d !important; }
+  .bg-indigo-50, .bg-violet-50 { background: #fff1f7 !important; }
+  .bg-indigo-100, .bg-violet-100 { background: #fce7f3 !important; }
+  .text-indigo-500, .text-indigo-600, .text-violet-600 { color: #ec4899 !important; }
+  .text-indigo-700, .text-violet-700 { color: #be185d !important; }
+  .text-indigo-800 { color: #9d174d !important; }
+  .shadow-indigo-200, .shadow-violet-200 { --tw-shadow-color: rgba(236,72,153,.18) !important; }
+
+  /* Premium editorial polish */
+  body { letter-spacing: -.006em; }
+  header { isolation: isolate; }
+  header::before {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 45%;
+    background: linear-gradient(to top, rgba(255,255,255,.22), transparent);
+    pointer-events: none;
+  }
+  header .max-w-7xl { padding-top: 2.25rem; padding-bottom: 2.25rem; }
+  header h1 { font-weight: 900; }
+  header p:first-of-type { font-weight: 600; opacity: .9; }
+  header p:last-of-type { display: inline-flex; align-items: center; gap: .4rem; }
+  header p:last-of-type::before { content: ""; width: .42rem; height: .42rem; border-radius: 50%; background: #db2777; box-shadow: 0 0 0 .25rem rgba(219,39,119,.12); }
+
+  /* Floating tab rail */
+  body > .max-w-7xl.mt-6.no-print > .bg-white {
+    border-radius: 1.2rem !important;
+    padding: .35rem !important;
+    background: rgba(255,255,255,.72) !important;
+    box-shadow: 0 14px 35px rgba(190,24,93,.09);
+  }
+  .tab-btn { border-radius: .95rem !important; letter-spacing: .01em; }
+  .tab-btn:not(.bg-indigo-600):not(.bg-violet-600) { color: #9f426c !important; }
+  .tab-btn:not(.bg-indigo-600):not(.bg-violet-600):hover { background: #fff1f7 !important; color: #be185d !important; }
+
+  /* Sidebar and page surfaces */
+  aside > div { border-radius: 1.25rem !important; box-shadow: 0 18px 45px rgba(190,24,93,.08) !important; }
+  aside .border-b { border-color: rgba(244,114,182,.14) !important; }
+  main { position: relative; }
+  main::before {
+    content: "";
+    position: absolute;
+    width: 16rem; height: 16rem;
+    right: -7rem; top: 8rem;
+    background: radial-gradient(circle, rgba(251,207,232,.34), transparent 68%);
+    pointer-events: none;
+    z-index: -1;
+  }
+  #panelShort > div:first-child, #panelLong > div:first-child {
+    padding: 1.5rem 1.65rem;
+    border: 1px solid rgba(244,114,182,.16) !important;
+    box-shadow: 0 15px 38px rgba(190,24,93,.07);
+  }
+  #panelShort > div:first-child span, #panelLong > div:first-child span {
+    box-shadow: 0 7px 14px rgba(236,72,153,.14);
+  }
+  #shortContent > .q-card, #longContent > .q-card { animation: cardRise .55s both; }
+  #shortContent > .q-card:nth-child(2), #longContent > .q-card:nth-child(2) { animation-delay: .04s; }
+  #shortContent > .q-card:nth-child(3), #longContent > .q-card:nth-child(3) { animation-delay: .08s; }
+  @keyframes cardRise { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+  .q-card > .flex > div:first-child, .q-card > h3 span {
+    box-shadow: 0 7px 16px rgba(236,72,153,.12);
+  }
+  .answer-copy, .long-copy { color: #526074; }
+  .answer-copy p, .long-copy p { text-wrap: pretty; }
+  .long-copy h4 { color: #831843; border-bottom-color: rgba(244,114,182,.22); }
+
+  /* CTAs feel like a premium control, not default utility buttons */
+  #btnDownloadShort, #btnDownloadLong {
+    min-height: 3.65rem;
+    border-radius: 1rem !important;
+    letter-spacing: .005em;
+    position: relative;
+    overflow: hidden;
+  }
+  #btnDownloadShort::after, #btnDownloadLong::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 25%, rgba(255,255,255,.25) 48%, transparent 70%);
+    transform: translateX(-120%);
+    transition: transform .65s ease;
+  }
+  #btnDownloadShort:hover::after, #btnDownloadLong:hover::after { transform: translateX(120%); }
+  #btnDownloadShort svg, #btnDownloadLong svg { position: relative; z-index: 1; }
+  #btnDownloadShort span, #btnDownloadLong span { position: relative; z-index: 1; }
+
+  @media (max-width: 640px) {
+    header .max-w-7xl { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+    body > .max-w-7xl.mt-6.no-print > .bg-white { margin-inline: -.1rem; }
+    #panelShort > div:first-child, #panelLong > div:first-child { padding: 1.15rem !important; }
+    #btnDownloadShort, #btnDownloadLong { min-height: 3.35rem; font-size: .84rem; }
+  }
+
+  /* Long-answer reading layout */
+  #longContent .q-card {
+    padding: 1.75rem 2rem !important;
+    border-left: 1px solid rgba(244,114,182,.2);
+  }
+  #longContent .q-card > h3 {
+    margin: -.15rem 0 1.45rem;
+    padding-bottom: 1.1rem;
+    border-bottom: 1px solid rgba(244,114,182,.2);
+    color: #831843;
+    font-size: 1.08rem;
+    line-height: 1.6;
+    letter-spacing: -.01em;
+  }
+  #longContent .q-card > h3 span:first-child {
+    flex: 0 0 auto;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: .75rem;
+    background: linear-gradient(135deg, #fbcfe8, #f5d0fe) !important;
+    color: #9d174d !important;
+    font-weight: 800;
+  }
+  .long-copy { max-width: 55rem; }
+  .long-paragraph {
+    position: relative;
+    margin: 0 0 1.1rem !important;
+    color: #475569 !important;
+    font-size: 1rem !important;
+    line-height: 2 !important;
+    letter-spacing: .002em;
+  }
+  .long-paragraph strong { color: #9d174d; font-weight: 800; }
+  .long-section-title {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    margin: 1.8rem 0 .85rem !important;
+    padding: 0 !important;
+    border: 0 !important;
+    color: #831843 !important;
+    font-size: 1.08rem !important;
+    line-height: 1.5;
+  }
+  .section-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.7rem;
+    height: 1.7rem;
+    padding: 0 .35rem;
+    border-radius: .55rem;
+    background: #fce7f3;
+    color: #be185d;
+    font-size: .75rem;
+    font-weight: 900;
+  }
+  .long-points {
+    margin: .35rem 0 1.35rem !important;
+    padding: .2rem 0 .2rem 1.6rem !important;
+    color: #475569 !important;
+    border-left: 2px solid #fbcfe8;
+  }
+  .long-points li {
+    padding: .35rem 0 .35rem .3rem;
+    padding-left: .25rem;
+    line-height: 1.85 !important;
+    font-size: .96rem;
+  }
+  .long-points li::marker { color: #ec4899; font-size: 1.1em; }
+  .long-points strong { color: #9d174d; }
+  .long-flow {
+    position: relative;
+    margin: 1rem 0 1.45rem;
+    padding: 1.15rem 1.3rem;
+    border: 1px solid #fbcfe8;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, #fff8fb, #fdf2f8);
+    color: #9d174d;
+    font-size: .95rem;
+    line-height: 2.15;
+    text-align: center;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.65);
+  }
+  .long-example, .long-important {
+    margin: 1.25rem 0 1.45rem;
+    padding: 1.15rem 1.3rem;
+    border-radius: 1rem;
+    color: #475569;
+    line-height: 1.9;
+  }
+  .long-example {
+    border: 1px solid #fbcfe8;
+    border-left: 4px solid #ec4899;
+    background: linear-gradient(135deg, #fff8fb, #fff1f7);
+  }
+  .long-important {
+    border: 1px solid #f5d0fe;
+    border-left: 4px solid #d946ef;
+    background: linear-gradient(135deg, #fff8fb, #fdf4ff);
+  }
+  .long-example > strong, .long-important > strong {
+    display: block;
+    margin-bottom: .55rem;
+    color: #9d174d;
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .long-important p { margin: .35rem 0 !important; font-size: .92rem !important; line-height: 1.75 !important; }
+  .long-important p::before { content: "✓"; margin-right: .45rem; color: #ec4899; font-weight: 900; }
+  .long-table { margin: 1.25rem 0 1.5rem; border: 1px solid #fbcfe8; border-radius: 1rem; box-shadow: 0 10px 25px rgba(190,24,93,.06); }
+  .long-table table { border: 0; min-width: 34rem; }
+  .long-table th { padding: .85rem !important; background: #fce7f3 !important; color: #9d174d !important; }
+  .long-table td { padding: .8rem !important; line-height: 1.65; }
+  .long-table tr:nth-child(even) td { background: #fffafb; }
+  @media (max-width: 640px) {
+    #longContent .q-card { padding: 1.15rem !important; }
+    .long-paragraph { font-size: .92rem !important; line-height: 1.9 !important; }
+    .long-section-title { font-size: 1rem !important; margin-top: 1.45rem !important; }
+    .long-points li { font-size: .9rem; }
+    .long-example, .long-important, .long-flow { padding: .95rem 1rem; }
+  }
 </style>
 </head>
 <body class="bg-slate-100 min-h-screen">
@@ -1411,17 +1729,20 @@ function renderLongAnswer() {
 function renderLongContent(q) {
   return `
     ${q.long.map(item => {
-    if (item.type === "h") return `<h4 class="text-lg font-bold text-slate-800">${formatInline(item.text)}</h4>`;
-    if (item.type === "p") return `<p class="text-base text-slate-600">${formatInline(item.text)}</p>`;
-    if (item.type === "points") return `<ul class="list-disc pl-5 text-slate-600 space-y-2">${item.items.map(x => `<li>${formatInline(x)}</li>`).join("")}</ul>`;
-    if (item.type === "flow") return `<div class="flow-line text-slate-700 text-sm leading-8 bg-slate-50 border border-slate-200 rounded-lg p-4 mb-4">${item.lines.map(formatInline).join("<br>")}</div>`;
+    if (item.type === "h") {
+      const heading = String(item.text).match(/^(\d+)[.)]\s*(.*)$/);
+      return `<h4 class="long-section-title">${heading ? `<span class="section-number">${heading[1]}</span><span>${formatInline(heading[2])}</span>` : `<span class="section-number">•</span><span>${formatInline(item.text)}</span>`}</h4>`;
+    }
+    if (item.type === "p") return `<p class="long-paragraph">${formatInline(item.text)}</p>`;
+    if (item.type === "points") return `<ul class="long-points">${item.items.map(x => `<li>${formatInline(x)}</li>`).join("")}</ul>`;
+    if (item.type === "flow") return `<div class="long-flow flow-line">${item.lines.map(formatInline).join("<br>")}</div>`;
     if (item.type === "table") {
       const thead = `<thead class="bg-slate-50"><tr>${item.headers.map(h => `<th class="text-left p-3 text-xs font-bold text-slate-700">${formatInline(h)}</th>`).join("")}</tr></thead>`;
       const tbody = `<tbody>${item.rows.map(row => `<tr>${row.map(c => `<td class="p-3 text-sm text-slate-600 border-t border-slate-100">${formatInline(c)}</td>`).join("")}</tr>`).join("")}</tbody>`;
-      return `<div class="overflow-x-auto mt-3"><table class="w-full caption-bottom text-sm border-collapse">${thead}${tbody}</table></div>`;
+      return `<div class="long-table overflow-x-auto"><table class="w-full caption-bottom text-sm border-collapse">${thead}${tbody}</table></div>`;
     }
-    if (item.type === "example") return `<div class="bg-violet-50 rounded-lg p-4 mt-4"><strong>उदाहरण:</strong> ${formatInline(item.text)}</div>`;
-    if (item.type === "important") return `<div class="bg-indigo-50 rounded-lg p-4 mt-4"><strong>महत्वपूर्ण बिंदु:</strong><div class="mt-2">${item.items.map(x => `<p class="text-sm text-indigo-700 mb-2">${formatInline(x)}</p>`).join("")}</div></div>`;
+    if (item.type === "example") return `<div class="long-example"><strong>उदाहरण</strong><div>${formatInline(item.text)}</div></div>`;
+    if (item.type === "important") return `<div class="long-important"><strong>महत्वपूर्ण बिंदु</strong><div>${item.items.map(x => `<p>${formatInline(x)}</p>`).join("")}</div></div>`;
     return "";
   }).join("")}
   `;
@@ -1581,16 +1902,16 @@ async function downloadPDF(type) {
       pageMargins: [38, 46, 38, 42],
       defaultStyle: {
         font: "NotoDevanagari",
-        fontSize: 10.2,
-        lineHeight: 1.25,
+        fontSize: 11.2,
+        lineHeight: 1.3,
         color: "#1e293b"
       },
       styles: {
-        header: { fontSize: 18, bold: true, color: "#312e81" },
-        subheader: { fontSize: 12, bold: true, color: "#4f46e5" },
-        question: { fontSize: 12.5, bold: true, color: "#312e81", margin: [0, 8, 0, 3], keepWithNext: true },
-        subquestion: { fontSize: 10.5, bold: true, color: "#4338ca", margin: [0, 5, 0, 2], keepWithNext: true },
-        caption: { fontSize: 9, color: "#64748b" },
+        header: { fontSize: 20, bold: true, color: "#312e81" },
+        subheader: { fontSize: 14, bold: true, color: "#4f46e5" },
+        question: { fontSize: 14, bold: true, color: "#312e81", margin: [0, 8, 0, 3], keepWithNext: true },
+        subquestion: { fontSize: 12, bold: true, color: "#4338ca", margin: [0, 5, 0, 2], keepWithNext: true },
+        caption: { fontSize: 10, color: "#64748b" },
         footer: { fontSize: 10, color: "#64748b" }
       },
       header: (currentPage, pageCount) => ({
@@ -1699,13 +2020,13 @@ function generateShortPDFContent(questions) {
       { text: [{ text: `प्रश्न ${i + 1}: ` }, ...pdfRichText(q.title)], style: "question", margin: [0, 4, 0, 2] },
       { text: "उत्तर:", style: "subquestion", margin: [0, 0, 0, 2] },
       ...q.short.map(item => {
-        if (item.type === "p") return { text: pdfRichText(item.text), margin: [0, 1, 0, 2], fontSize: 10 };
-        if (item.type === "points") return pdfList(item.items, { margin: [0, 1, 0, 4], fontSize: 10 });
+        if (item.type === "p") return { text: pdfRichText(item.text), margin: [0, 1, 0, 2], fontSize: 11 };
+        if (item.type === "points") return pdfList(item.items, { margin: [0, 1, 0, 4], fontSize: 11 });
         if (item.type === "remember") {
           return {
             text: [{ text: "याद रखें: ", bold: true }, ...item.items.flatMap((x, index) => [...pdfRichText(x), ...(index < item.items.length - 1 ? [{ text: " | " }] : [])])],
             margin: [0, 2, 0, 2],
-            fontSize: 10,
+            fontSize: 11,
             bold: true,
             color: "#4f46e5"
           };
@@ -1770,7 +2091,7 @@ function generateLongPDFContent(questions) {
             keepWithHeaderRows: 1
           },
           layout: pdfTableLayout,
-          fontSize: 8.5,
+          fontSize: 9.5,
           margin: [0, 1, 0, 5]
         };
         if (item.type === "example") return { text: [{ text: "उदाहरण: ", bold: true }, ...pdfRichText(item.text)], fillColor: "#f5f3ff", margin: [4, 3, 4, 4] };
