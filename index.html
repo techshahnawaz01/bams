@@ -379,6 +379,31 @@
     .long-points li { font-size: .9rem; }
     .long-example, .long-important, .long-flow { padding: .95rem 1rem; }
   }
+
+  /* Mobile overflow guardrails */
+  html, body { max-width: 100%; overflow-x: hidden; }
+  main, aside, #shortContent, #longContent, .q-card, .long-copy { min-width: 0; max-width: 100%; }
+  img, svg, video, canvas { max-width: 100%; }
+  @media (max-width: 767px) {
+    body { font-size: 15px; }
+    header .max-w-7xl > .flex { align-items: flex-start; }
+    header .flex.items-center { flex-wrap: wrap; }
+    header .inline-flex { white-space: nowrap; }
+    header h1, header p { overflow-wrap: anywhere; }
+    .flex.flex-col.lg\:flex-row { width: 100%; }
+    aside, main { width: 100% !important; }
+    main { overflow: hidden; }
+    .q-card { width: 100%; overflow: hidden; }
+    .q-card > .flex { min-width: 0; }
+    .q-card > .flex > div:last-child, .q-card h3 > span:last-child { min-width: 0; overflow-wrap: anywhere; }
+    .long-copy { overflow-wrap: anywhere; word-break: normal; }
+    .long-flow { max-width: 100%; overflow-wrap: anywhere; white-space: normal; }
+    .long-table { width: 100%; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .long-table table { width: max-content !important; min-width: 100% !important; }
+    .long-table th, .long-table td { white-space: normal; overflow-wrap: anywhere; }
+    #btnDownloadShort, #btnDownloadLong { width: 100%; max-width: 100%; }
+    #toast { width: auto; }
+  }
 </style>
 </head>
 <body class="bg-slate-100 min-h-screen">
