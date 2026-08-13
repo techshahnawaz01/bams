@@ -219,6 +219,12 @@ function loadFonts() {
         bold: boldName,
         italics: regularName,
         bolditalics: boldName
+      },
+      Latin: {
+        normal: "Roboto-Regular.ttf",
+        bold: "Roboto-Medium.ttf",
+        italics: "Roboto-Italic.ttf",
+        bolditalics: "Roboto-MediumItalic.ttf"
       }
     };
     fontsReady = true;
@@ -1588,11 +1594,11 @@ async function downloadPDF(type) {
         footer: { fontSize: 10, color: "#64748b" }
       },
       header: (currentPage, pageCount) => ({
-        text: `BAMS - पदार्थ विज्ञान   |   ${type === "short" ? "Short Answer Notes" : "Long Answer Notes"}\nलेखक: Shahnawaz`,
+        text: pdfRichText(`BAMS - पदार्थ विज्ञान   |   ${type === "short" ? "Short Answer Notes" : "Long Answer Notes"}\nलेखक: Shahnawaz`),
         alignment: "center", font: "NotoDevanagari", fontSize: 8, bold: true, color: "#475569", margin: [0, 20, 0, 0]
       }),
       footer: (currentPage, pageCount) => ({
-        text: `लेखक: Shahnawaz   |   पृष्ठ ${currentPage} / ${pageCount}`,
+        text: pdfRichText(`लेखक: Shahnawaz   |   पृष्ठ ${currentPage} / ${pageCount}`),
         alignment: "center", font: "NotoDevanagari", fontSize: 8, bold: true, color: "#475569", margin: [0, 0, 0, 18]
       }),
       info: {
@@ -1627,9 +1633,15 @@ function pdfRichText(text) {
   // Keep only ASCII + Devanagari for maximum compatibility with embedded PDF fonts.
   const clean = String(text).replace(/[^\u0000-\u007F\u0900-\u097F]/g, " ");
   const parts = clean.split(/(\*\*[^*]+\*\*)/g).filter(Boolean);
-  return parts.map(part => part.startsWith("**") && part.endsWith("**")
-    ? { text: part.slice(2, -2), bold: true }
-    : { text: part.replace(/\*\*/g, "") });
+  return parts.flatMap(part => {
+    const bold = part.startsWith("**") && part.endsWith("**");
+    const value = bold ? part.slice(2, -2) : part.replace(/\*\*/g, "");
+    return value.split(/([A-Za-z0-9]+)/g).filter(Boolean).map(run => ({
+      text: run,
+      font: /^[A-Za-z0-9]+$/.test(run) ? "Latin" : "NotoDevanagari",
+      bold
+    }));
+  });
 }
 
 function pdfList(items, options = {}) {
@@ -1658,13 +1670,13 @@ const pdfTableLayout = {
 function generateShortPDFContent(questions) {
   return [
     {
-      text: "BAMS - पदार्थ विज्ञान",
+      text: pdfRichText("BAMS - पदार्थ विज्ञान"),
       style: "header",
       alignment: "center",
       margin: [0, 0, 0, 12]
     },
     {
-      text: "Short Answer Notes\nPrepared by Shahnawaz",
+      text: pdfRichText("Short Answer Notes\nPrepared by Shahnawaz"),
       style: "subheader",
       alignment: "center",
       margin: [0, 0, 0, 8]
@@ -1676,7 +1688,7 @@ function generateShortPDFContent(questions) {
       margin: [0, 4, 0, 8]
     },
     {
-      text: "Total Questions: " + questions.length,
+      text: pdfRichText("Total Questions: " + questions.length),
       style: "caption",
       alignment: "center",
       margin: [0, 4, 0, 8]
@@ -1714,13 +1726,13 @@ function generateShortPDFContent(questions) {
 function generateLongPDFContent(questions) {
   const content = [
     {
-      text: "BAMS - पदार्थ विज्ञान",
+      text: pdfRichText("BAMS - पदार्थ विज्ञान"),
       style: "header",
       alignment: "center",
       margin: [0, 0, 0, 12]
     },
     {
-      text: "Long Answer Detailed Notes\nPrepared by Shahnawaz",
+      text: pdfRichText("Long Answer Detailed Notes\nPrepared by Shahnawaz"),
       style: "subheader",
       alignment: "center",
       margin: [0, 0, 0, 8]
@@ -1732,7 +1744,7 @@ function generateLongPDFContent(questions) {
       margin: [0, 4, 0, 8]
     },
     {
-      text: "Total Questions: " + questions.length,
+      text: pdfRichText("Total Questions: " + questions.length),
       style: "caption",
       alignment: "center",
       margin: [0, 4, 0, 8]
