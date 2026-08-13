@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>हिंदी PDF जनरेटर | Hindi PDF Generator</title>
+
+<!-- pdfmake: full OpenType shaping via pdfkit + fontkit (correct Devanagari matras & conjuncts) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.js"></script>
+
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-dark: #4338ca;
+    --primary-light: #eef2ff;
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --radius: 12px;
+    --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans Devanagari", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 860px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  header h1 {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  header h1 .hi { color: var(--primary); }
+
+  header p {
+    color: var(--muted);
+    margin-top: 8px;
+    font-size: 0.95rem;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  /* ---- Tabs ---- */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: #f8fafc;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 16px 20px;
+    border: none;
+    background: transparent;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s, background 0.2s;
+    font-family: inherit;
+  }
+
+  .tab-btn:hover { color: var(--primary); background: var(--primary-light); }
+
+  .tab-btn.active {
+    color: var(--primary);
+    background: var(--card);
+  }
+
+  .tab-btn.active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 3px 3px 0 0;
+  }
+
+  .tab-btn .badge {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+
+  /* ---- Panels ---- */
+  .tab-panel { display: none; padding: 24px; }
+  .tab-panel.active { display: block; animation: fadeIn 0.25s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 260px;
+    padding: 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 1.05rem;
+    line-height: 1.8;
+    font-family: "Noto Sans Devanagari", "Mangal", "Nirmala UI", "Kohinoor Devanagari", sans-serif;
+    color: var(--text);
+    resize: vertical;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #fcfdff;
+  }
+
+  textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+  }
+
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .char-count {
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .char-count b { color: var(--text); }
+
+  .char-count.warn { color: var(--danger); }
+  .char-count.warn b { color: var(--danger); }
+
+  .btn-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    font-family: inherit;
+  }
+
+  .btn-download:hover { background: var(--primary-dark); }
+  .btn-download:active { transform: scale(0.98); }
+  .btn-download:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .btn-download svg { width: 18px; height: 18px; }
+
+  .status {
+    margin-top: 16px;
+    font-size: 0.9rem;
+    color: var(--muted);
+    min-height: 1.4em;
+    text-align: center;
+  }
+
+  .status.error { color: var(--danger); }
+  .status.success { color: var(--success); }
+
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  footer {
+    margin-top: 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 600px) {
+    body { padding: 16px 10px; }
+    header h1 { font-size: 1.5rem; }
+    .tab-panel { padding: 16px; }
+    textarea { min-height: 200px; }
+    .btn-download { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1><span class="hi">हिंदी</span> PDF जनरेटर</h1>
+    <p>देवनागरी टेक्स्ट को सही मात्राओं और संयुक्त अक्षरों के साथ PDF में बदलें</p>
+  </header>
+
+  <div class="card">
+    <!-- Tabs -->
+    <div class="tabs" role="tablist">
+      <button class="tab-btn active" id="tab-short" role="tab" aria-selected="true" data-tab="short">
+        Short Answer <span class="badge">लघु उत्तर</span>
+      </button>
+      <button class="tab-btn" id="tab-long" role="tab" aria-selected="false" data-tab="long">
+        Long Answer <span class="badge">दीर्घ उत्तर</span>
+      </button>
+    </div>
+
+    <!-- Short Answer Panel -->
+    <div class="tab-panel active" id="panel-short" role="tabpanel">
+      <div class="panel-label">लघु उत्तर (Short Answer)</div>
+      <textarea id="shortText" placeholder="यहाँ हिंदी में लघु उत्तर लिखें...">भारत एक महान देश है। यहाँ विभिन्न भाषाएँ, धर्म और संस्कृतियाँ निवास करती हैं। हमारा देश कृषि प्रधान है और यहाँ के किसान अन्नदाता कहलाते हैं। स्वतंत्रता के बाद भारत ने विज्ञान, तकनीकी और शिक्षा के क्षेत्र में अभूतपूर्व प्रगति की है। हमें अपने देश की एकता और अखंडता को बनाए रखना चाहिए।</textarea>
+      <div class="meta-row">
+        <span class="char-count" id="shortCount">अक्षर: <b>0</b></span>
+        <button class="btn-download" id="downloadShort">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Long Answer Panel -->
+    <div class="tab-panel" id="panel-long" role="tabpanel">
+      <div class="panel-label">दीर्घ उत्तर (Long Answer)</div>
+      <textarea id="longText" placeholder="यहाँ हिंदी में दीर्घ उत्तर लिखें...">जल ही जीवन है। जल के बिना पृथ्वी पर जीवन की कल्पना करना असंभव है। मनुष्य, पशु-पक्षी, वनस्पति — सभी जीवों के लिए जल अत्यंत आवश्यक है। जल का उपयोग पीने, खेती करने, उद्योग चलाने और बिजली बनाने में होता है। वर्षा ही जल का मुख्य स्रोत है, और वर्षा का जल नदियों, तालाबों और झीलों में एकत्रित होता है।
+
+परंतु आज जल की समस्या दिन-प्रतिदिन गंभीर होती जा रही है। बढ़ती जनसंख्या, औद्योगिकीकरण और जल का दुरुपयोग इसके प्रमुख कारण हैं। अनेक स्थानों पर भूजल स्तर तेजी से गिर रहा है। हमें जल का संरक्षण करना चाहिए। वर्षा जल संचयन, नल बंद करना, टपकती नलियों की मरम्मत और जल का पुनः उपयोग जैसे उपाय अपनाकर हम जल बचा सकते हैं।
+
+जल संरक्षण केवल सरकार का ही कर्तव्य नहीं है, बल्कि यह हम सभी की जिम्मेदारी है। यदि हम आज जल नहीं बचाएँगे, तो आने वाली पीढ़ियों को पानी के लिए तरसना पड़ेगा। अतः हमें जल के महत्व को समझना होगा और इसका सदुपयोग करना होगा। "जल है तो कल है" — यह कहावत आज के समय में और भी अधिक प्रासंगिक हो गई है। हमें अपने आस-पास के लोगों को भी जल संरक्षण के प्रति जागरूक करना चाहिए, ताकि एक स्वच्छ और हरित भविष्य का निर्माण हो सके।</textarea>
+      <div class="meta-row">
+        <span class="char-count" id="longCount">अक्षर: <b>0</b></span>
+        <button class="btn-download" id="downloadLong">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="status" id="status"></div>
+
+  <footer>हिंदी टेक्स्ट चयन योग्य और खोज योग्य PDF • A4 • Noto Sans Devanagari</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- Font URLs (Noto Sans Devanagari, full OpenType shaping) ----------
+  const FONT_REGULAR_URL = "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io@main/fonts/NotoSansDevanagari/hinted/ttf/NotoSansDevanagari-Regular.ttf";
+  const FONT_BOLD_URL    = "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io@main/fonts/NotoSansDevanagari/hinted/ttf/NotoSansDevanagari-Bold.ttf";
+
+  // ---------- DOM refs ----------
+  const tabShort   = document.getElementById("tab-short");
+  const tabLong    = document.getElementById("tab-long");
+  const panelShort = document.getElementById("panel-short");
+  const panelLong  = document.getElementById("panel-long");
+  const shortText  = document.getElementById("shortText");
+  const longText   = document.getElementById("longText");
+  const shortCount = document.getElementById("shortCount");
+  const longCount  = document.getElementById("longCount");
+  const btnShort   = document.getElementById("downloadShort");
+  const btnLong    = document.getElementById("downloadLong");
+  const statusEl   = document.getElementById("status");
+
+  let activeTab = "short";
+  let fontsReady = false;
+  let fontLoadPromise = null;
+
+  // ---------- Tab switching ----------
+  function switchTab(tab) {
+    activeTab = tab;
+    const isShort = tab === "short";
+    tabShort.classList.toggle("active", isShort);
+    tabLong.classList.toggle("active", !isShort);
+    tabShort.setAttribute("aria-selected", isShort);
+    tabLong.setAttribute("aria-selected", !isShort);
+    panelShort.classList.toggle("active", isShort);
+    panelLong.classList.toggle("active", !isShort);
+    clearStatus();
+  }
+
+  tabShort.addEventListener("click", function () { switchTab("short"); });
+  tabLong.addEventListener("click", function () { switchTab("long"); });
+
+  // ---------- Character count ----------
+  function updateCount(textarea, el) {
+    const len = textarea.value.length;
+    el.innerHTML = "अक्षर: <b>" + len + "</b>";
+    el.classList.toggle("warn", len > 5000);
+  }
+  shortText.addEventListener("input", function () { updateCount(shortText, shortCount); });
+  longText.addEventListener("input", function () { updateCount(longText, longCount); });
+  updateCount(shortText, shortCount);
+  updateCount(longText, longCount);
+
+  // ---------- Status ----------
+  function setStatus(msg, type) {
+    statusEl.textContent = msg;
+    statusEl.className = "status" + (type ? " " + type : "");
+  }
+  function clearStatus() { statusEl.textContent = ""; statusEl.className = "status"; }
+
+  // ---------- Font loading (cached) ----------
+  function loadFonts() {
+    if (fontsReady) return Promise.resolve();
+    if (fontLoadPromise) return fontLoadPromise;
+
+    fontLoadPromise = Promise.all([
+      fetch(FONT_REGULAR_URL).then(function (r) {
+        if (!r.ok) throw new Error("Regular font fetch failed: " + r.status);
+        return r.arrayBuffer();
+      }),
+      fetch(FONT_BOLD_URL).then(function (r) {
+        if (!r.ok) throw new Error("Bold font fetch failed: " + r.status);
+        return r.arrayBuffer();
+      })
+    ]).then(function (buffers) {
+      const toBase64 = function (buf) {
+        const bytes = new Uint8Array(buf);
+        let binary = "";
+        const chunk = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunk) {
+          binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+        }
+        return btoa(binary);
+      };
+
+      pdfMake.fonts = {
+        NotoDevanagari: {
+          normal: toBase64(buffers[0]),
+          bold: toBase64(buffers[1])
+        }
+      };
+      fontsReady = true;
+      return true;
+    }).catch(function (err) {
+      fontLoadPromise = null;
+      throw err;
+    });
+
+    return fontLoadPromise;
+  }
+
+  // ---------- PDF generation ----------
+  function generatePDF(title, bodyText) {
+    const trimmed = bodyText.trim();
+    if (!trimmed) {
+      setStatus("कृपया पहले कुछ टेक्स्ट लिखें।", "error");
+      return;
+    }
+
+    setStatus("फ़ॉन्ट लोड हो रहा है…", "");
+    loadFonts().then(function () {
+      setStatus("PDF बन रहा है…", "");
+
+      const docDefinition = {
+        pageSize: "A4",
+        pageMargins: [50, 60, 50, 60],
+        defaultStyle: {
+          font: "NotoDevanagari",
+          fontSize: 12,
+          lineHeight: 1.6,
+          color: "#1e293b"
+        },
+        content: [
+          {
+            text: title,
+            style: "heading",
+            alignment: "center"
+          },
+          {
+            text: "हिंदी PDF जनरेटर",
+            style: "subheading",
+            alignment: "center"
+          },
+          {
+            canvas: [
+              {
+                type: "line",
+                x1: 0,
+                y1: 0,
+                x2: 515,
+                y2: 0,
+                lineWidth: 1,
+                lineColor: "#cbd5e1"
+              }
+            ],
+            margin: [0, 8, 0, 16]
+          },
+          {
+            text: trimmed,
+            style: "body"
+          }
+        ],
+        styles: {
+          heading: {
+            fontSize: 20,
+            bold: true,
+            margin: [0, 0, 0, 6]
+          },
+          subheading: {
+            fontSize: 11,
+            color: "#64748b",
+            margin: [0, 0, 0, 0]
+          },
+          body: {
+            fontSize: 12,
+            lineHeight: 1.7,
+            alignment: "justify"
+          }
+        }
+      };
+
+      pdfMake.createPdf(docDefinition).download(
+        (activeTab === "short" ? "short-answer" : "long-answer") + ".pdf"
+      );
+
+      setStatus("PDF सफलतापूर्वक डाउनलोड हो गया! ✓", "success");
+    }).catch(function (err) {
+      console.error(err);
+      setStatus("फ़ॉन्ट लोड करने में त्रुटि। इंटरनेट कनेक्शन जाँचें।", "error");
+    });
+  }
+
+  // ---------- Download handlers ----------
+  btnShort.addEventListener("click", function () {
+    generatePDF("लघु उत्तर (Short Answer)", shortText.value);
+  });
+
+  btnLong.addEventListener("click", function () {
+    generatePDF("दीर्घ उत्तर (Long Answer)", longText.value);
+  });
+
+  // Preload fonts in background for snappier first download
+  loadFonts().catch(function () { /* ignore; will retry on download */ });
+})();
+</script>
+
+</body>
+</html>
