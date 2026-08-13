@@ -43,6 +43,7 @@
       <div>
         <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">BAMS – पदार्थ विज्ञान</h1>
         <p class="text-indigo-200 mt-1 text-sm sm:text-base">Short & Long Answer Study Notes</p>
+        <p class="text-indigo-100 mt-2 text-xs sm:text-sm font-semibold">Prepared by Shahnawaz</p>
       </div>
       <div class="flex items-center gap-3">
         <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-xs font-semibold backdrop-blur">
@@ -1546,13 +1547,19 @@ async function downloadPDF(type) {
         footer: { fontSize: 10, color: "#64748b" }
       },
       header: (currentPage, pageCount) => ({
-        text: `BAMS - पदार्थ विज्ञान   |   ${type === "short" ? "Short Answer Notes" : "Long Answer Notes"}`,
+        text: `BAMS - पदार्थ विज्ञान   |   ${type === "short" ? "Short Answer Notes" : "Long Answer Notes"}   |   Shahnawaz`,
         alignment: "center", font: "NotoDevanagari", fontSize: 8, color: "#64748b", margin: [0, 24, 0, 0]
       }),
       footer: (currentPage, pageCount) => ({
-        text: `पृष्ठ ${currentPage} / ${pageCount}`,
+        text: `Prepared by Shahnawaz   |   पृष्ठ ${currentPage} / ${pageCount}`,
         alignment: "center", font: "NotoDevanagari", fontSize: 8, color: "#64748b", margin: [0, 0, 0, 20]
       }),
+      info: {
+        title: `BAMS पदार्थ विज्ञान - ${type === "short" ? "Short Answer Notes" : "Long Answer Notes"}`,
+        author: "Shahnawaz",
+        subject: "BAMS Padarth Vigyan Study Notes",
+        creator: "BAMS Padarth Vigyan Study Notes by Shahnawaz"
+      },
       content: type === "short"
         ? generateShortPDFContent(questions)
         : generateLongPDFContent(questions)
@@ -1593,7 +1600,7 @@ function generateShortPDFContent(questions) {
       margin: [0, 0, 0, 12]
     },
     {
-      text: "Short Answer Notes",
+      text: "Short Answer Notes\nPrepared by Shahnawaz",
       style: "subheader",
       alignment: "center",
       margin: [0, 0, 0, 8]
@@ -1649,7 +1656,7 @@ function generateLongPDFContent(questions) {
       margin: [0, 0, 0, 12]
     },
     {
-      text: "Long Answer Detailed Notes",
+      text: "Long Answer Detailed Notes\nPrepared by Shahnawaz",
       style: "subheader",
       alignment: "center",
       margin: [0, 0, 0, 8]
