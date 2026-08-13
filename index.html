@@ -47,10 +47,10 @@
       </div>
       <div class="flex items-center gap-3">
         <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-xs font-semibold backdrop-blur">
-          📚 18 प्रश्न
+          18 प्रश्न
         </span>
         <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-xs font-semibold backdrop-blur">
-          🎯 BAMS सिलेबस
+          BAMS सिलेबस
         </span>
       </div>
     </div>
@@ -61,10 +61,10 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 no-print">
   <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-1.5 flex gap-1">
     <button id="tabShort" class="tab-btn flex-1 py-3 px-4 rounded-lg font-bold text-sm sm:text-base transition-all duration-200 bg-indigo-600 text-white shadow-md" onclick="switchTab('short')">
-      📝 Short Answer
+      Short Answer
     </button>
     <button id="tabLong" class="tab-btn flex-1 py-3 px-4 rounded-lg font-bold text-sm sm:text-base transition-all duration-200 text-slate-600 hover:bg-slate-100" onclick="switchTab('long')">
-      📖 Long Answer
+      Long Answer
     </button>
   </div>
 </div>
@@ -119,7 +119,7 @@
       <div id="panelShort" class="tab-panel active space-y-6">
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-            <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm">📝</span>
+            <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold">S</span>
             Short Answer Notes
           </h2>
           <p class="text-sm text-slate-500 mt-1">2–5 अंकों के प्रश्नों के लिए • त्वरित पुनरावृत्ति • आसान याद रखने के लिए</p>
@@ -133,7 +133,7 @@
       <div id="panelLong" class="tab-panel space-y-6">
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-            <span class="w-8 h-8 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center text-sm">📖</span>
+            <span class="w-8 h-8 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center text-sm font-bold">L</span>
             Long Answer Detailed Notes
           </h2>
           <p class="text-sm text-slate-500 mt-1">विस्तृत उत्तर • उदाहरण सहित • तालिका एवं चित्र सहित • परीक्षा-उन्मुख</p>
@@ -1383,8 +1383,7 @@ function renderLongContent(q) {
 function formatInline(value) {
   return String(value)
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*\*/g, "")
-    .replace(/💡|⚠️|📚|🎯|📝|📖/g, "");
+    .replace(/\*\*/g, "");
 }
 
 /* ============================================================
