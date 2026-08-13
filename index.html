@@ -12,7 +12,21 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.js"></script>
 
 <style>
-  body { font-family: "Noto Sans Devanagari", "Mangal", "Nirmala UI", "Kohinoor Devanagari", sans-serif; }
+  @font-face {
+    font-family: "Noto Sans Devanagari";
+    src: url("https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io@main/fonts/NotoSansDevanagari/hinted/ttf/NotoSansDevanagari-Regular.ttf") format("truetype");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Noto Sans Devanagari";
+    src: url("https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io@main/fonts/NotoSansDevanagari/hinted/ttf/NotoSansDevanagari-Bold.ttf") format("truetype");
+    font-style: normal;
+    font-weight: 700 900;
+    font-display: swap;
+  }
+  body { font-family: "Noto Sans Devanagari", "Noto Sans", Arial, sans-serif; }
   .flow-line { font-family: "Noto Sans Devanagari", "Mangal", sans-serif; }
   .sidebar-scroll::-webkit-scrollbar { width: 6px; }
   .sidebar-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
@@ -27,7 +41,22 @@
   .q-card { transition: box-shadow 0.2s, transform 0.2s; }
   .q-card:hover { box-shadow: 0 8px 25px rgba(79, 70, 229, 0.12); transform: translateY(-1px); }
   .nav-item.active { background: #eef2ff; color: #4338ca; border-left: 3px solid #4f46e5; }
-  @media print { .no-print { display: none !important; } }
+  table { width: 100%; border-collapse: collapse; border: 1px solid #334155; }
+  th, td { border: 1px solid #94a3b8; padding: 8px; vertical-align: middle; }
+  th { font-weight: 700; text-align: center; background: #f1f5f9; }
+  tr { break-inside: avoid; page-break-inside: avoid; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  .page-break { break-before: page; page-break-before: always; }
+  .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+  @page { size: A4 portrait; margin: 15mm; }
+  @media print {
+    body { margin: 0; background: #fff; }
+    .no-print { display: none !important; }
+    table { border-collapse: collapse !important; width: 100% !important; }
+    th, td { border: 1px solid #000 !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
   .answer-copy strong, .long-copy strong { color: #312e81; font-weight: 800; }
   .long-copy h4 { margin-top: 1.35rem; margin-bottom: .65rem; padding-bottom: .3rem; border-bottom: 1px solid #e2e8f0; }
   .long-copy p { line-height: 1.95; margin-bottom: .85rem; }
@@ -200,6 +229,18 @@ function loadFonts() {
   });
 
   return fontLoadPromise;
+}
+
+async function waitForRenderingAssets() {
+  if (document.fonts && document.fonts.ready) await document.fonts.ready;
+  const images = Array.from(document.images || []);
+  await Promise.all(images.map(image => image.complete
+    ? Promise.resolve()
+    : new Promise(resolve => {
+        image.addEventListener("load", resolve, { once: true });
+        image.addEventListener("error", resolve, { once: true });
+      })));
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 }
 
 /* ============================================================
@@ -1526,6 +1567,7 @@ async function downloadPDF(type) {
   setStatus("फ़ॉन्ट लोड हो रहा है…", "");
   try {
     await loadFonts();
+    await waitForRenderingAssets();
     setStatus("PDF बन रहा है…", "");
 
     const docDefinition = {
@@ -1546,12 +1588,12 @@ async function downloadPDF(type) {
         footer: { fontSize: 10, color: "#64748b" }
       },
       header: (currentPage, pageCount) => ({
-        text: `BAMS - पदार्थ विज्ञान   |   ${type === "short" ? "Short Answer Notes" : "Long Answer Notes"}   |   Shahnawaz`,
-        alignment: "center", font: "NotoDevanagari", fontSize: 8, color: "#64748b", margin: [0, 24, 0, 0]
+        text: `BAMS - पदार्थ विज्ञान   |   ${type === "short" ? "Short Answer Notes" : "Long Answer Notes"}\nलेखक: Shahnawaz`,
+        alignment: "center", font: "NotoDevanagari", fontSize: 8, bold: true, color: "#475569", margin: [0, 20, 0, 0]
       }),
       footer: (currentPage, pageCount) => ({
-        text: `Prepared by Shahnawaz   |   पृष्ठ ${currentPage} / ${pageCount}`,
-        alignment: "center", font: "NotoDevanagari", fontSize: 8, color: "#64748b", margin: [0, 0, 0, 20]
+        text: `लेखक: Shahnawaz   |   पृष्ठ ${currentPage} / ${pageCount}`,
+        alignment: "center", font: "NotoDevanagari", fontSize: 8, bold: true, color: "#475569", margin: [0, 0, 0, 18]
       }),
       info: {
         title: `BAMS पदार्थ विज्ञान - ${type === "short" ? "Short Answer Notes" : "Long Answer Notes"}`,
@@ -1600,6 +1642,18 @@ function pdfList(items, options = {}) {
     ...options
   };
 }
+
+const pdfTableLayout = {
+  hLineWidth: () => 0.7,
+  vLineWidth: () => 0.7,
+  hLineColor: () => "#64748b",
+  vLineColor: () => "#64748b",
+  paddingLeft: () => 5,
+  paddingRight: () => 5,
+  paddingTop: () => 4,
+  paddingBottom: () => 4,
+  fillColor: (rowIndex) => rowIndex === 0 ? "#e2e8f0" : (rowIndex % 2 ? "#ffffff" : "#f8fafc")
+};
 
 function generateShortPDFContent(questions) {
   return [
@@ -1692,7 +1746,21 @@ function generateLongPDFContent(questions) {
         if (item.type === "p") return { text: pdfRichText(item.text), margin: [0, 0, 0, 3] };
         if (item.type === "points") return pdfList(item.items, { margin: [0, 0, 0, 3] });
         if (item.type === "flow") return { table: { body: item.lines.map(x => [{ text: pdfRichText(x), alignment: "center", bold: true }]) }, layout: "noBorders", margin: [0, 2, 0, 4] };
-        if (item.type === "table") return { table: { headerRows: 1, widths: Array(item.headers.length).fill("*"), body: [item.headers.map(x => ({ text: pdfRichText(x), bold: true, color: "#312e81" })), ...item.rows.map(row => row.map(x => ({ text: pdfRichText(x) })))] }, layout: "lightHorizontalLines", fontSize: 8.5, margin: [0, 1, 0, 4] };
+        if (item.type === "table") return {
+          table: {
+            headerRows: 1,
+            widths: Array(item.headers.length).fill("*"),
+            body: [
+              item.headers.map(x => ({ text: pdfRichText(x), bold: true, color: "#1e293b", alignment: "center" })),
+              ...item.rows.map(row => row.map(x => ({ text: pdfRichText(x), alignment: "left" })))
+            ],
+            dontBreakRows: true,
+            keepWithHeaderRows: 1
+          },
+          layout: pdfTableLayout,
+          fontSize: 8.5,
+          margin: [0, 1, 0, 5]
+        };
         if (item.type === "example") return { text: [{ text: "उदाहरण: ", bold: true }, ...pdfRichText(item.text)], fillColor: "#f5f3ff", margin: [4, 3, 4, 4] };
         if (item.type === "important") return pdfList(item.items, { color: "#4338ca", fillColor: "#eef2ff", margin: [4, 3, 4, 4] });
         return null;
