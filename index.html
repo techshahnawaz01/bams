@@ -1590,6 +1590,17 @@ function pdfRichText(text) {
     : { text: part.replace(/\*\*/g, "") });
 }
 
+function pdfList(items, options = {}) {
+  return {
+    text: items.flatMap((item, index) => [
+      { text: "- ", color: options.color },
+      ...pdfRichText(item),
+      ...(index < items.length - 1 ? [{ text: "\n" }] : [])
+    ]),
+    ...options
+  };
+}
+
 function generateShortPDFContent(questions) {
   return [
     {
@@ -1623,7 +1634,7 @@ function generateShortPDFContent(questions) {
       { text: "उत्तर:", style: "subquestion", margin: [0, 0, 0, 2] },
       ...q.short.map(item => {
         if (item.type === "p") return { text: pdfRichText(item.text), margin: [0, 1, 0, 2], fontSize: 10 };
-        if (item.type === "points") return { ul: item.items.map(x => ({ text: pdfRichText(x) })), margin: [0, 1, 0, 4], fontSize: 10 };
+        if (item.type === "points") return pdfList(item.items, { margin: [0, 1, 0, 4], fontSize: 10 });
         if (item.type === "remember") {
           return {
             text: [{ text: "याद रखें: ", bold: true }, ...item.items.flatMap((x, index) => [...pdfRichText(x), ...(index < item.items.length - 1 ? [{ text: " | " }] : [])])],
@@ -1679,11 +1690,11 @@ function generateLongPDFContent(questions) {
       ...q.long.map(item => {
         if (item.type === "h") return { text: pdfRichText(item.text), style: "subquestion" };
         if (item.type === "p") return { text: pdfRichText(item.text), margin: [0, 0, 0, 3] };
-        if (item.type === "points") return { ul: item.items.map(x => ({ text: pdfRichText(x) })), margin: [0, 0, 0, 3] };
+        if (item.type === "points") return pdfList(item.items, { margin: [0, 0, 0, 3] });
         if (item.type === "flow") return { table: { body: item.lines.map(x => [{ text: pdfRichText(x), alignment: "center", bold: true }]) }, layout: "noBorders", margin: [0, 2, 0, 4] };
         if (item.type === "table") return { table: { headerRows: 1, widths: Array(item.headers.length).fill("*"), body: [item.headers.map(x => ({ text: pdfRichText(x), bold: true, color: "#312e81" })), ...item.rows.map(row => row.map(x => ({ text: pdfRichText(x) })))] }, layout: "lightHorizontalLines", fontSize: 8.5, margin: [0, 1, 0, 4] };
         if (item.type === "example") return { text: [{ text: "उदाहरण: ", bold: true }, ...pdfRichText(item.text)], fillColor: "#f5f3ff", margin: [4, 3, 4, 4] };
-        if (item.type === "important") return { ul: item.items.map(x => ({ text: pdfRichText(x), color: "#4338ca" })), fillColor: "#eef2ff", margin: [4, 3, 4, 4] };
+        if (item.type === "important") return pdfList(item.items, { color: "#4338ca", fillColor: "#eef2ff", margin: [4, 3, 4, 4] });
         return null;
       }).filter(Boolean),
       { text: "", margin: [0, 1, 0, 1] }
